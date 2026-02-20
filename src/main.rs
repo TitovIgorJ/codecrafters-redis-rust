@@ -6,7 +6,7 @@ use tracing::{error, info};
 async fn main() -> anyhow::Result<()> {
     let listener = TcpListener::bind("127.0.0.1:6379").await?;
 
-    for (stream, addr) in listener.accept().await {
+    while let Ok((stream, addr)) = listener.accept().await {
         info!("Accepted new connection: {}", addr);
         let (mut reader, mut writer) = tokio::io::split(stream);
 
@@ -18,6 +18,7 @@ async fn main() -> anyhow::Result<()> {
                     Ok(n) => {
                         info!("Read {} bytes", n);
                         writer.write_all(b"+PONG\r\n").await.unwrap();
+                        writer.flush().await.unwrap();
                     }
                     Err(err) => {
                         error!("{err}");
