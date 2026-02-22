@@ -23,7 +23,9 @@ async fn main() -> anyhow::Result<()> {
                     Ok(0) => break,
                     Ok(_n) => {
                         if buf.get_u8() == b'*' {
-                            let (_, array) = bulk_string_array(&buf).unwrap();
+                            let (remaining, array) = bulk_string_array(&buf[..]).unwrap();
+                            buf.advance(buf.len() - remaining.len());
+
                             let mut args = VecDeque::from_iter(array);
 
                             if let Some(c) = args.pop_front() {
