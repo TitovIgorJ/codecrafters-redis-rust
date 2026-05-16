@@ -123,8 +123,6 @@ async fn main() -> anyhow::Result<()> {
                                 }
                             }
                         }
-
-                        println!("Read {n} bytes");
                     }
                     Err(err) => {
                         error!("{err}");
