@@ -91,7 +91,7 @@ async fn main() -> anyhow::Result<()> {
                                             let _ = writer.write(v.as_bytes()).await.unwrap();
                                             let _ = writer.write(b"\r\n").await.unwrap();
                                         } else {
-                                            let _ = writer.write(b"+ERROR\r\n").await.unwrap();
+                                            send_error_bulk_str(&mut writer).await.unwrap();
                                         }
                                     }
                                     b"set" => {
@@ -100,8 +100,9 @@ async fn main() -> anyhow::Result<()> {
                                             let value =
                                                 args.pop_front().expect("we checked length");
                                             store_clone.set(key, value);
+                                            let _ = writer.write(b"+OK\r\n").await.unwrap();
                                         } else {
-                                            let _ = writer.write(b"+ERROR\r\n").await.unwrap();
+                                            send_error_bulk_str(&mut writer).await.unwrap();
                                         }
                                     }
                                     b"get" => {
@@ -140,7 +141,7 @@ async fn send_null_bulk_str(w: &mut WriteHalf<TcpStream>) -> io::Result<()> {
 }
 
 async fn send_error_bulk_str(w: &mut WriteHalf<TcpStream>) -> io::Result<()> {
-    w.write_all(b"-1\r\n").await
+    w.write_all(b"+ERROR\r\n").await
 }
 
 async fn send_bulk_str(w: &mut WriteHalf<TcpStream>, str: &BulkString) -> io::Result<()> {
