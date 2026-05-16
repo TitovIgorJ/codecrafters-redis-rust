@@ -7,7 +7,7 @@ use std::sync::{Arc, Mutex};
 use tokio::io;
 use tokio::io::{AsyncReadExt, AsyncWriteExt, WriteHalf};
 use tokio::net::{TcpListener, TcpStream};
-use tracing::{debug, error, info};
+use tracing::{error, info};
 
 pub mod command;
 pub mod types;
@@ -41,7 +41,7 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt().init();
     let listener = TcpListener::bind("127.0.0.1:6379").await?;
 
-    let mut store = Storage::new();
+    let store = Storage::new();
 
     while let Ok((stream, addr)) = listener.accept().await {
         info!("Accepted new connection: {}", addr);
@@ -50,7 +50,6 @@ async fn main() -> anyhow::Result<()> {
         tokio::spawn(async move {
             let mut buf = BytesMut::with_capacity(4092);
             loop {
-                println!("read_buf()");
                 match reader.read_buf(&mut buf).await {
                     Ok(0) => {
                         println!("Read 0 bytes");
