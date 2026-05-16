@@ -145,5 +145,12 @@ async fn send_error_bulk_str(w: &mut WriteHalf<TcpStream>) -> io::Result<()> {
 }
 
 async fn send_bulk_str(w: &mut WriteHalf<TcpStream>, str: &BulkString) -> io::Result<()> {
-    w.write_all(str.value.as_bytes()).await
+    let len = str.value.len();
+    w
+        .write_all(format!("${len}\r\n").as_bytes())
+        .await
+        .unwrap();
+    w.write_all(str.value.as_bytes()).await?;
+
+    w.write_all(b"\r\n").await
 }
